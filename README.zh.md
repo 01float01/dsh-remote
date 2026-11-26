@@ -10,10 +10,11 @@
 > portal）、802.1X/EAP、仅 IPv6、强制代理，这些情况代码里都没有处理，也**不保证换个网络能直接
 > 跑起来**。
 >
-> **移动端兼容是已知缺口，不是卖点。** **完全没有测过 iOS / iPadOS 和鸿蒙（HarmonyOS）**；
-> **也没有在三星、vivo、OPPO、小米的实体安卓设备上测过**，小米的模拟器同样没测。实际跑过的只有
-> 安卓模拟器（AVD）和仓库里的自动化测试 —— 具体哪些验过、哪些没验，见
-> [docs/cross-device.md](docs/cross-device.md)。
+> **实际验过什么**（完整口径见 [docs/cross-device.md](docs/cross-device.md)）：**荣耀 MagicOS
+> 平板与手机，实机通过**；安卓通用 / **三星 / vivo / OPPO 在各自厂商官方开发者平台提供的虚拟设备
+> 上通过** —— 是虚拟设备，不是实体机；**小米仅做理论验证**，没有上机、也没有跑虚拟机。
+>
+> **完全没有考虑的：iOS / iPadOS 与鸿蒙 HarmonyOS。** 没测过，也不作任何声明。
 >
 > **测试只证明它测的那部分。** `npm test` 证明网关能启动、能鉴权、能代理、三处注入都在；
 > 它**不**证明你的手机、你的浏览器、你的网络能跑通。
@@ -133,21 +134,21 @@ $env:DSH_GATE_TOKEN_LOG = "C:\path\to\dsh-launch-stdout.log"
 
 ## 兼容性 —— 验过什么、没验什么
 
-这份清单刻意很短。
+下面几档是**不同性质**的证据，不要当成一个笼统的"支持"。
 
 | | 状态 |
 | --- | --- |
 | 网络工况 | **只有一种**：北邮 BUPT-mobile 校园网。客户端隔离、认证门户、802.1X/EAP、仅 IPv6、强制代理，均未处理、未测试。 |
-| 安卓设备 | **只有模拟器**（AVD `android-34`，AOSP x86_64，无 GMS），浏览器为 Firefox 136 与一个 Chromium 系内核。**没有用过任何实体手机或平板。** |
-| iOS / iPadOS | **完全没测。** Safari 对自签证书的提示、Cookie 策略、视口单位都与 Chromium 不同；布局层正是为此避开 `dvh` 与 `:has()`，但"避开风险"不等于"验证过"。 |
-| 鸿蒙 HarmonyOS | **完全没测。** |
-| 三星 / vivo / OPPO / 小米实体机 | **没测过。** 厂商浏器的证书例外入口位置、后台省电杀进程的激进程度、UA 怪癖都不一样。 |
-| 小米模拟器 | **没测过**；只用了 AOSP 镜像。 |
+| 荣耀 MagicOS 平板 | **实机通过**，在校园 Wi-Fi 上跑通全链路。 |
+| 荣耀 MagicOS 手机 | **实机通过**。 |
+| 安卓通用 / 三星 / vivo / OPPO | **在各厂商官方开发者平台提供的虚拟设备上通过。** 是虚拟设备而非实体机：验的是厂商浏览器内核，验不到射频与电池管理。 |
+| 小米（MIUI / HyperOS） | **仅理论验证。** 依据其浏览器内核档位与 polyfill 的 API 覆盖面做的推断，未上机、未跑虚拟机。 |
+| iOS / iPadOS | **未考虑。** 不测、不作声明。Safari 在自签证书提示、Cookie 策略、视口单位上都不同；布局层正是为此避开 `dvh` 与 `:has()`，但"避开风险"不等于"验证过"。 |
+| 鸿蒙 HarmonyOS | **未考虑。** 不测、不作声明。 |
 | 宿主系统 | 在 Windows 上开发；`.vbs` / `.ps1` 是 Windows 专用便利封装。网关本体是纯 Node，CI 在 Linux 与 Windows 上都跑过，但**没有人在 Linux / macOS 上把它当日常工具用过**。 |
 
-真正被验证过的部分是下面那组自动化测试：`npm run test:unit` 与 `npm run test:smoke` 不需要
-设备、也不需要装 DSH。所有与设备相关的结论都来自
-[docs/evidence.md](docs/evidence.md) 记录的模拟器实测；完整口径见
+真正被本仓库验证过的是 `npm run test:unit` 与 `npm run test:smoke`：不需要设备、也不需要装 DSH。
+所有与设备相关的结论都来自 [docs/evidence.md](docs/evidence.md) 记录的实测，按证据层级汇总在
 [docs/cross-device.md](docs/cross-device.md)。
 
 ## 测试

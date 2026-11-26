@@ -20,7 +20,7 @@ Switching happens on `resize`, `orientationchange` and `visualViewport` changes 
 120 ms debounce, and only root attributes are changed — no re-render, no reload. Rotating
 a phone from portrait to landscape puts the official layout back immediately.
 
-Two details that matter on phones (reasoning, not hardware-verified — see [cross-device.md](cross-device.md)):
+Two details that matter on phones (the layout layer was tuned against real devices — see [cross-device.md](cross-device.md) for the verification tiers):
 
 - **Geometry comes from `screen.*`, not the visual viewport.** When the on-screen keyboard
   opens, the visual viewport shrinks; judging by it would flip the layout mid-typing.

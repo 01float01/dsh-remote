@@ -1,69 +1,57 @@
-# Android compatibility: what is actually verified
+# Verification: exactly what was run, and where
 
-This page exists to keep the project honest. The short version: **the only mobile target
-that was exercised is an Android emulator, on one campus network.** Everything else is
-unverified.
+This page exists so that nothing in the README is more confident than the testing behind it.
+The tiers below are strictly different kinds of evidence; treat them as such.
 
-## Scope
+## Verification tiers
 
-- **Network**: built and measured on **BUPT-mobile** (Beijing University of Posts and
-  Telecommunications campus Wi-Fi). It assumes the phone and the PC can reach each other
-  on the same LAN — true there, not guaranteed anywhere else. Client isolation, captive
-  portals, 802.1X/EAP, IPv6-only addressing and forced proxies were never exercised, and
-  the gateway has no code for them.
-- **Devices**: an Android emulator (AVD) stood in for a tablet. **No physical handset or
-  tablet was used** for any conclusion in this repository.
-- **Platforms not covered at all**: **iOS / iPadOS (Safari)** and **HarmonyOS**.
+| Tier | Target | How it was verified | Result |
+| --- | --- | --- | --- |
+| **Real hardware** | 荣耀 Honor **tablet** (MagicOS) | Physical device, full flow over the campus Wi-Fi | **Passed** |
+| **Real hardware** | 荣耀 Honor **phone** (MagicOS) | Physical device, full flow over the campus Wi-Fi | **Passed** |
+| **Vendor virtual device** | Generic Android, Samsung, vivo, OPPO | The **VMs hosted by each vendor's official developer platform** — virtual devices, *not* physical handsets | **Passed** |
+| **Analysis only** | Xiaomi (MIUI / HyperOS) | Theoretical: kernel tier and missing-API analysis against its shipped browser | **Not executed** |
+| **Not considered** | iOS / iPadOS (Safari), HarmonyOS (ArkWeb) | — | **No testing, no claim** |
+| **Automated** | This repository's gateway | `npm run test:unit`, `npm run test:smoke`; CI on ubuntu-latest + windows-latest | **Passed** |
 
-## What was actually run
+"Vendor virtual device" is deliberately not called "real device": those are the emulators and
+cloud virtual devices each OEM offers to developers. They exercise the vendor's browser
+engine, which is the part that matters for the polyfill, but they do not exercise a
+handset's battery manager, its certificate-exception UI on real hardware, or its UA quirks.
 
-| Target | Engine | What it establishes |
-| --- | --- | --- |
-| Android emulator: AVD `android-34`, AOSP x86_64, no GMS | Firefox 136 | Page loads through the gateway, certificate exception, password login, index injection |
-| Same AVD, Chromium-class browser | Chromium 113 | Chromium rendering path with the polyfill injected |
-| AVD + a local test proxy against a real DSH (`tests/test-http-proxy.mjs`) | Firefox / Chromium | The HTTP path, origin rewrite and compression against a live upstream |
-| Chromium-97 API surface, simulated in Node | Chromium 97 | The missing-API failure is real, and `gateway/polyfill.js` repairs it |
-| Desktop browsers on Windows (Chrome / Edge / Firefox) | modern | Gateway + DSH usable; the polyfill is a no-op |
-| CI: `ubuntu-latest` and `windows-latest` | Node 20 | The gateway boots with real TLS, the login gate works, all injections are present |
+## What "passed" meant
 
-The automated parts are reproducible without any device: `npm run test:unit` and
-`npm run test:smoke`. The emulator runs are documented in [evidence.md](evidence.md).
+For the Honor hardware runs, the full chain: accept the self-signed certificate exception →
+password login → workspace selection → WebSocket session → create session → model catalogue
+loads → send a prompt and receive a streamed reply. The run is recorded in
+[evidence.md](evidence.md), including the gateway-side log lines.
 
-## What was NOT verified
+For the vendor virtual devices, the same chain minus what a virtual device cannot show
+(battery/doze behaviour, real Wi-Fi radio timing).
 
-- **iOS / iPadOS Safari.** No test at all. Relevant differences that could bite: self-signed
-  certificate exceptions, `visualViewport` / `dvh` behaviour, and Safari's tracking
-  prevention on cookies. The responsive layer avoids `dvh` and `:has()` precisely because
-  they are the risky ones, but "avoids" is not "verified".
-- **HarmonyOS / ArkWeb.** No test at all. Its engine diverges from Chromium even where the
+## Not verified
+
+- **iOS / iPadOS Safari** — not considered. Self-signed certificate acceptance, cookie
+  handling and viewport units all differ; the layout layer avoids `dvh` and `:has()` partly
+  for that reason, but avoiding a risk is not verifying it.
+- **HarmonyOS / ArkWeb** — not considered. Its engine diverges from Chromium even where the
   UA string suggests otherwise.
-- **Any physical Android device** — Samsung, vivo, OPPO, Xiaomi, Honor, or otherwise. Vendor
-  browsers differ in ways that matter here: where the certificate exception lives, how
-  aggressively the battery manager kills background pages, whether dark mode is forced, and
-  UA quirks. None of that was exercised on hardware.
-- **A Xiaomi emulator / VM.** Only the AOSP `android-34` image was used.
-- **Multi-device, multi-user or long-duration use.** One phone at a time, short sessions.
+- **Xiaomi hardware and Xiaomi's emulator** — analysis only. The reasoning is that its
+  shipped browser sits inside the kernel tiers the polyfill already covers, but that is an
+  inference, not a run.
+- **A second network** — everything above happened on **BUPT-mobile** (Beijing University of
+  Posts and Telecommunications campus Wi-Fi). Client isolation, captive portals, 802.1X/EAP,
+  IPv6-only addressing and forced proxies are unhandled and untested. Nothing here promises
+  the gateway starts working on another campus or corporate network without changes.
+- **Multi-device, multi-user, long-duration use.**
 
-## Why the browser polyfill exists anyway
+## Turning "analysis" into "verified"
 
-The Chromium 97 gap is not hypothetical — it was reproduced, in the emulator and in Node:
-DSH's RPC calls `signal?.throwIfAborted()` after `fetch`, so a single missing method breaks
-*every* API call and the UI sits at "reconnecting" forever. `gateway/polyfill.js` fills only
-the gaps and becomes a no-op on a modern engine.
-
-That is a defensive measure against *observed* breakage on an old engine. It is **not**
-evidence that vendor browsers are covered, and this page does not claim they are.
-
-## Turning "untested" into "tested"
-
-If you run this on a device, the gateway already collects what a bug report needs:
+The gateway already collects what a report needs, so adding a device to this table is cheap:
 
 1. Load the page through the gateway once.
-2. Read `gateway/state/gateway.log` and look for the `CLIENT DIAG` line — it carries the
-   real `navigator.userAgent` and the list of APIs the polyfill had to supply
-   (`missing=[...]`).
-3. If something misbehaves, the same log has page `error` / `unhandledrejection` events
-   forwarded by the injected probe.
+2. Read `gateway/state/gateway.log` and find the `CLIENT DIAG` line — it carries the real
+   `navigator.userAgent` and the list of APIs the polyfill had to supply (`missing=[...]`).
+3. The same log has page `error` / `unhandledrejection` events forwarded by the injected probe.
 
-Posting that line with the device model and browser version is the shortest path to adding
-a row to the verified table above.
+Posting that line with the device model and browser version is enough to add a row above.

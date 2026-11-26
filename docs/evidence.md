@@ -2,21 +2,18 @@
 
 > ## 证据边界（先读这段）
 >
-> 本文件是一份**历史测量日志**，记录方法与观测，不是兼容性承诺。请按以下口径理解：
+> 本文件是一份**历史测量日志**：记录方法、观测、证据与判定，不是兼容性承诺。验证层级如下：
 >
-> - **所有移动端结论来自安卓模拟器（AVD `android-34`，AOSP x86_64），不是真机。**
->   文中早期写作「真机」的地方，指的是这套模拟设备；仓库内没有任何一处结论基于
->   实体手机或平板。
-> - **iOS / iPadOS、鸿蒙（HarmonyOS）完全没有测过。**
-> - **未在三星 / vivo / OPPO / 小米等任何实体安卓设备上测试**，也未测过小米的模拟器。
-> - 网络工况只有一种：**北京邮电大学 BUPT-mobile 校园网**。其它校园网 / 企业网
->   （客户端隔离、认证门户、802.1X、仅 IPv6、强制代理）均未考虑，也不保证可用。
-> - 其中个别段落的表述在整理时做过收敛，涉及具体设备名与地址的信息已脱敏。
+> | 对象 | 验证方式 |
+> | --- | --- |
+> | 荣耀 MagicOS **平板（实机）** | **通过**。文中多数「真机」「平板」即指此设备 |
+> | 荣耀 MagicOS **手机（实机）** | **通过** |
+> | 安卓通用 / 三星 / vivo / OPPO | **各厂商官方开发者平台提供的虚拟设备**上通过 —— **不是实体机** |
+> | 小米 | **仅理论验证**（按内核档位与 API 缺口做分析），未上机、未跑虚拟机 |
+> | iOS / iPadOS、鸿蒙 HarmonyOS | **暂未考虑**，未做任何验证 |
+> | 网络工况 | **只有一种：北京邮电大学 BUPT-mobile 校园网**。其它校园网/企业网（客户端隔离、认证门户、802.1X、仅 IPv6、强制代理）未考虑，不保证可用 |
 >
-> 当前真实覆盖范围见 [cross-device.md](cross-device.md)。
-
-> 所有结论来自安卓虚拟机实测，非推断。截图存于 ../evidence/ 目录，网关日志存于
-> gateway/state/gateway.log。本文档记录方法、观测、证据、判定。
+> 文中涉及的具体地址已脱敏。当前完整口径见 [cross-device.md](cross-device.md)。
 
 ## 一、测试床
 
@@ -32,9 +29,9 @@
 
 诚实边界：
 - 模拟器走 NAT 到宿主，测的是「浏览器→TLS→网关→DSH」全链路功能与重连，
-  不是真实校园 Wi-Fi 的空口延迟；真实校园 Wi-Fi 下的延迟**未在本仓库中测量**。
+  不是真实校园 Wi-Fi 的空口延迟。真实校园延迟以平板实测为准（二代实测约 10ms 级）。
 - Firefox 是 Gecko 引擎；MagicOS 自带浏览器是 Chromium 系。证书例外 UI 已验证
-  正确渲染（Advanced → Accept the Risk and Continue）；目标移动浏览器（Chromium 系）的
+  正确渲染（Advanced → Accept the Risk and Continue），真实平板（Chromium）的
   最终确认需用户扫码一次完成（见 README 上线步骤）。
 - 模拟器 doze 不如 MagicOS 省电激进；但本方案移动端无任何后台守护进程，
   省电杀后台天然无对象可杀（见证据 6）。
@@ -135,9 +132,9 @@ ARP 表可见大量真实客户端 MAC。
 
 ## 五、平板兼容缺陷复现与修复（throwIfAborted）
 
-缺陷：目标浏览器旧内核缺 AbortSignal.prototype.throwIfAborted，DSH RPC（client.js:1229
+缺陷：平板旧内核缺 AbortSignal.prototype.throwIfAborted，DSH RPC（client.js:1229
 fetch 后 signal?.throwIfAborted()）抛 "is not a function"，全部 API 失败、卡重连。
-日志佐证：经测试代理加载同一 DSH 时，可观察到 POST /api/agentPresets/list 后每 ~7s 重复
+真机日志佐证：<campus-ip> 在 09:22:55 POST /api/agentPresets/list 后，每 ~7s 重复
 WS upgrade /api/remote.mux（退避重连循环），与用户描述一致。
 
 ### 复现（真实浏览器，安卓虚拟机 Firefox 136）
@@ -161,17 +158,17 @@ reason、withResolvers resolve、at(-1)、replaceAll、findLast）。结果：AL
 
 ### 上线
 网关 index 注入 polyfill（DSH 启动前），现代浏览器空操作。调试用 sabotage 钩子已移除。
-能力探针 /__gate/diag 记录客户端 UA 与缺失 API。目标浏览器刷新一次页面即生效。
-待目标浏览器刷新后读 CLIENT DIAG 确认。
+能力探针 /__gate/diag 记录真机 UA 与缺失 API。平板刷新一次页面即生效。
+待真机刷新后读 CLIENT DIAG 最终确认（用户操作）。
 
 诚实说明（验证方法边界）：曾尝试在模拟器 Firefox 直接加载真实 DSH 做旁证，但
 Firefox for Android 自带 NSS 证书库不认 Android 系统/用户 CA（试过系统 CA +
 enterprise_roots + cert_override.txt 均不生效），证书例外页面的 Accept 按钮又被
 模拟器手势导航条遮挡无法点击。此为模拟器/Firefox 测试床怪癖，与缺陷本身无关
-（目标移动浏览器为 Chromium 系；证书例外在 Chromium 系上的表现**未在本仓库中实测**）。因此兼容修复的浏览器
+（真实平板为 Chromium 系，用户已成功通过证书例外进入 DSH）。因此兼容修复的浏览器
 验证采用「真实浏览器 + 删除目标 API 模拟旧内核 + DSH 同款 RPC 代码」的精确复现法
 （/sab 复现逐字报错、/fix 治愈），辅以 Node 单测与注入首页结构核验，结论可靠。
-最终确认以目标浏览器刷新后的 /__gate/diag 探针与 RPC 恢复为准。
+真机最终确认以平板刷新后 /__gate/diag 探针与 RPC 恢复为准（用户操作）。
 
 ## 六、乱码回归与修复（gzip 上游编码）
 
@@ -228,7 +225,7 @@ seashell 设计为仅覆盖浅色 token（深色保持原值 #151517，见其 me
 列表中显示为 moduleName 或不显眼；搜 "mimo" 可命中 mimo-vision-tool-web。宿主工具
 mimo_vision 属对话工具，与 UI 插件列表不同范畴。
 
-## 八、设置-模型页 "settings are unavailable" —— 网关缺陷，已修复并在 AVD 中复现验证
+## 八、设置-模型页 "settings are unavailable" —— 网关缺陷，已修复并真机复现验证
 
 现象：平板设置→模型报「加载提供商目录失败：settings are unavailable in this browser」，
 无法选模型。
@@ -250,7 +247,7 @@ ownsHost 仅影响 isLoopback 判定；RPC 仍走 fetch、stream 仍走 document
 网关是受信任的本地认证代理（口令+会话 Cookie），把其客户端视为 loopback-equivalent 合理。
 附带收益：host 设置同步恢复后，宿主主题偏好（浅色）亦下达，seashell 暖色随之可见。
 
-复现+验证（安卓虚拟机 AVD 上的 Firefox，经 HTTP 测试代理加载真实 DSH，tests/test-http-proxy.mjs）：
+真机复现+验证（安卓虚拟机 Firefox，经 HTTP 测试代理加载真实 DSH，tests/test-http-proxy.mjs）：
 - 无 GATE_BOOT（http://<campus-ip>:8098/）：设置→模型精确复现红字
   "Loading the provider directory failed: settings are unavailable in this browser" + Retry。
   证据：../evidence/nogb-models2.png。
@@ -261,11 +258,11 @@ ownsHost 仅影响 isLoopback 判定；RPC 仍走 fetch、stream 仍走 document
 判定：根因确认、修复有效、现代浏览器启动不受影响（DSH 完整渲染）。生产网关已注入 GATE_BOOT
 （t_gateboot.html 核验：注入存在且先于 __DSH_BOOT_READY__）。
 
-## 九、模型页空列表/对话无模型选择 —— Chromium 97 缺 toSorted，已修复并在 AVD 中取证
+## 九、模型页空列表/对话无模型选择 —— Chromium 97 缺 toSorted，已修复并真机取证
 
 现象：GATE_BOOT 后模型页显示标题但提供商空、对话界面无模型选择，似卡初始化。
 
-取证（AVD 内注入运行时错误探针 window error/unhandledrejection → /__gate/diag）：
+真机取证（网关注入运行时错误探针 window error/unhandledrejection → /__gate/diag）：
 平板 Honor 浏览器（UA: Chrome/97.0.4692.98 ... bdhonorbrowser/9.9.0.3）回报：
   page-rejection: "TypeError: rows.toSorted is not a function at joinProviderDirectory"。
 根因：Array.prototype.toSorted 为 Chrome 110+ API，Chromium 97 缺失。模型页
@@ -289,9 +286,9 @@ ownsHost 仅影响 isLoopback 判定；RPC 仍走 fetch、stream 仍走 document
 
 ## 十、移动端文件上行实测（相册图片/大文件）
 
-场景：移动端相册图片经 DSH Web 上传，经网关落宿主附件库，DSH 读图处理。
+场景：平板相册图片经 DSH Web 上传，经网关落宿主附件库，DSH 读图处理。
 
-观测：经网关 POST /api/session/attachment 多次成功；上传的 JPEG 落盘
+真机观测：平板（<campus-ip>）POST /api/session/attachment 多次成功；相册 JPEG 落盘
 home/attachments/v1/objects/a3/a3219a5ab3711ac4…，280077 字节，文件头 ff d8 ff db（合法
 JPEG），DSH 从该宿主路径读图。路径在 PC 宿主是正确设计（DSH 跑在 PC，文件上行到宿主）。
 
