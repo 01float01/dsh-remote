@@ -6,19 +6,25 @@ password.
 
 English | [中文](README.zh.md)
 
-> **Scope, up front.** This gateway was built for exactly one deployment: a tablet browser on
-> **BUPT-mobile**, the campus Wi-Fi of Beijing University of Posts and Telecommunications.
+> **Scope, up front.** This gateway was built for exactly one deployment: a **phone or tablet**
+> browser on **BUPT-mobile**, the campus Wi-Fi of Beijing University of Posts and
+> Telecommunications.
 > No other campus or corporate network was evaluated — Wi-Fi client isolation, captive
 > portals, 802.1X/EAP, IPv6-only addressing and forced proxies are unhandled — and there is
 > **no guarantee it starts working on your network** without changes.
 >
 > **What was actually verified** (the full accounting is in
 > [docs/cross-device.md](docs/cross-device.md)): Honor MagicOS **tablet and phone, on real
-> hardware — passed**; generic Android, **Samsung, vivo and OPPO — through the virtual
-> devices of each vendor's official developer platform — passed**, though those are virtual
-> devices, not handsets; **Xiaomi — analysis only**, never executed on hardware or emulator.
+> hardware — passed**; **HarmonyOS — real hardware *and* the official cloud device farm —
+> passed**; **iOS / iPadOS — the official cloud device farm — passed**; generic Android,
+> **Samsung, vivo and OPPO — through the virtual devices of each vendor's official developer
+> platform — passed**, though those are virtual devices, not handsets; **Xiaomi — analysis
+> only**, never executed on hardware or emulator.
 >
-> **Not considered at all: iOS / iPadOS and HarmonyOS.** No testing and no claim.
+> **Hard floors.** **iOS ≈ 16.4**, and **Chromium/Android ≈ 94** — below those the page does
+> not work, because the app needs APIs the polyfill cannot supply. On an older handset,
+> install a current third-party browser (Chrome, Edge, Firefox) rather than using the system
+> browser.
 >
 > **The test suite says what it measures.** `npm test` proves that the gateway boots,
 > authenticates, proxies and injects its three scripts. It does not prove that your phone,
@@ -168,8 +174,9 @@ The tiers below are different kinds of evidence and should not be read as one nu
 | 荣耀 Honor phone (MagicOS) | **Real hardware — passed**. |
 | Samsung / vivo / OPPO / generic Android | **Passed on the virtual devices hosted by each vendor's official developer platform.** These are virtual devices, not handsets: the vendor browser engine is exercised, the radio and battery manager are not. |
 | Xiaomi (MIUI / HyperOS) | **Analysis only.** Reasoning from its browser's kernel tier and the polyfill's API coverage — never run, on hardware or emulator. |
-| iOS / iPadOS | **Not considered.** No testing, no claim. Safari's certificate prompts, cookie handling and viewport units all differ; the layout layer avoids `dvh` and `:has()` partly for that reason, but avoiding a risk is not verifying it. |
-| HarmonyOS | **Not considered.** No testing, no claim. |
+| iOS / iPadOS | **Passed on the official cloud device farm.** Hard floor **≈ iOS 16.4**; earlier versions are not covered. |
+| HarmonyOS | **Passed on real hardware and on the official cloud device farm.** |
+| Browser floor | **Chromium/Android ≈ 94** is the hard limit. Below it the app's own API needs exceed what the polyfill can restore — use a current third-party browser (Chrome, Edge, Firefox) instead of the system browser on an old device. |
 | Host OS | Developed on Windows; the `.vbs` / `.ps1` launchers are Windows-only conveniences. The gateway itself is plain Node and CI runs it on Linux and Windows, but nobody has run it as a daily driver on Linux or macOS. |
 
 `npm run test:unit` and `npm run test:smoke` are the parts that are genuinely verified here:

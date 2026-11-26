@@ -45,7 +45,7 @@ Hashed CSS-module class names change on every DSH build, so the layer never depe
 them. It prefers stable semantic hooks — `data-composer-stats`, `data-rightbar-col`,
 `dsh-arm-*` (from plugins), and the `_overlay` / `_panel` / `_nav` suffixes — and probes
 the grid container at runtime, tagging it with its own `data-dshb1-*` attributes. `:has()`,
-`dvh` and `color-mix()` are deliberately avoided: the oldest kernels in the compatibility
+`dvh`, `:has()` and `color-mix()` are deliberately avoided: anything at or near the Chromium 94
 matrix do not support them.
 
 ## Known limits
