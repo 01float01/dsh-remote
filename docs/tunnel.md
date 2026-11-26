@@ -25,8 +25,9 @@ Then `https://<random-host>:<random-port>/` reaches the gateway. Trade-offs:
   about both the untrusted CA and the name mismatch; you accept the exception once. If that
   warning bothers you, put a real certificate in `gateway/state/cert.pem` + `key.pem` (the
   gateway reuses them as long as `cert-ip.txt` matches the bound address) and use a domain.
-- **Free tiers are slow and unstable** (one megabyte per second is typical, and DSH's
-  first load is heavy). Expect the initial page load to take a minute.
+- **Free tiers are slow and unstable.** In the setup this project was developed against, a
+  free tunnel gave roughly 1 Mbps and the first DSH load took about a minute. Treat that as
+  an anecdote from one provider, not a benchmark.
 - **The public URL changes** when the tunnel restarts. Re-read it from the tunnel output or
   from `gateway/state/info.json` on the next gateway start.
 

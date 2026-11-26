@@ -6,6 +6,23 @@ password.
 
 English | [中文](README.zh.md)
 
+> **Scope, up front.** This gateway was built for exactly one deployment: a tablet browser on
+> **BUPT-mobile**, the campus Wi-Fi of Beijing University of Posts and Telecommunications.
+> No other campus or corporate network was evaluated — Wi-Fi client isolation, captive
+> portals, 802.1X/EAP, IPv6-only addressing and forced proxies are unhandled — and there is
+> **no guarantee it starts working on your network** without changes.
+>
+> **Mobile support is a known gap, not a claim.** There is **no iOS / iPadOS or HarmonyOS
+> testing at all**, and **no physical-device testing** on Samsung, vivo, OPPO or Xiaomi
+> hardware — nor on a Xiaomi emulator. What was actually exercised is an Android emulator
+> plus the automated tests in this repository; see
+> [docs/cross-device.md](docs/cross-device.md) for the exact list of what was and was not
+> verified.
+>
+> **The test suite says what it measures.** `npm test` proves that the gateway boots,
+> authenticates, proxies and injects its three scripts. It does not prove that your phone,
+> your browser or your network works.
+
 ```
 phone / tablet browser  ──https://<lan-ip>:8443──▶  gateway (Node, zero deps)  ──http://127.0.0.1:5140──▶  DSH Web
 ```
@@ -39,7 +56,7 @@ and keeps DSH on loopback.
     and model pages work instead of reporting "settings are unavailable in this browser".
   - `ui/responsive.css` + `ui/responsive.js` — a portrait layout that turns the desktop
     three-column UI into a usable single-column phone UI, automatically, and back.
-- **Docs** — the security model, a measured test log, the cross-OEM compatibility matrix,
+- **Docs** — the security model, a measured test log, an honest account of mobile coverage,
   and how to reach the gateway from outside the LAN.
 
 ## Quick start
@@ -139,14 +156,24 @@ What is actually enforced, and what is not.
 - Out of scope by design: multi-user accounts, per-user permissions, TLS with a real
   certificate authority (see [docs/tunnel.md](docs/tunnel.md) for when a domain is worth it).
 
-## Compatibility
+## Compatibility — what was and was not verified
 
-Tested with the browsers that actually ship on Android phones, from Chromium 97 to 146 —
-see [docs/cross-device.md](docs/cross-device.md) for the matrix and what "works" meant.
-Desktop browsers work too; the responsive layer simply stays out of the way.
+This is deliberately a short list.
 
-The Windows launchers (`run-gateway.vbs`, `start-gateway.ps1`) are conveniences. The gateway
-itself is plain Node and runs on Linux/macOS unchanged.
+| | Status |
+| --- | --- |
+| Network | **One environment only**: BUPT-mobile campus Wi-Fi. Client isolation, captive portals, 802.1X/EAP, IPv6-only and forced proxies are unhandled and untested. |
+| Android devices | **Emulator only** (AVD `android-34`, AOSP x86_64, no GMS), with Firefox 136 and a Chromium-class browser. **No physical handset or tablet was used.** |
+| iOS / iPadOS | **Not tested at all.** Safari's self-signed-certificate prompts, cookie handling and viewport units differ; the layer avoids `dvh` and `:has()` for that reason, but avoiding a risk is not verifying it. |
+| HarmonyOS | **Not tested at all.** |
+| Samsung / vivo / OPPO / Xiaomi handsets | **Not tested.** Vendor browsers differ in where the certificate exception lives, how hard the battery manager kills background pages, and UA quirks. |
+| Xiaomi emulator | **Not tested**; only the AOSP image was used. |
+| Host OS | Developed on Windows; the `.vbs` / `.ps1` launchers are Windows-only conveniences. The gateway itself is plain Node and CI runs it on Linux and Windows, but nobody has run it as a daily driver on Linux or macOS. |
+
+The automated tests below are the part that is genuinely verified: `npm run test:unit` and
+`npm run test:smoke` need no device and no DSH. Everything device-specific rests on the
+emulator runs recorded in [docs/evidence.md](docs/evidence.md) — see
+[docs/cross-device.md](docs/cross-device.md) for the full accounting.
 
 ## Testing
 

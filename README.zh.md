@@ -5,6 +5,19 @@
 
 [English](README.md) | 中文
 
+> **先说边界。** 这套网关是为**唯一一种部署**写的：**北京邮电大学校园网 BUPT-mobile** 上的一台
+> 平板浏览器。**其它校园网 / 企业网没有考虑过** —— Wi-Fi 客户端隔离、认证门户（captive
+> portal）、802.1X/EAP、仅 IPv6、强制代理，这些情况代码里都没有处理，也**不保证换个网络能直接
+> 跑起来**。
+>
+> **移动端兼容是已知缺口，不是卖点。** **完全没有测过 iOS / iPadOS 和鸿蒙（HarmonyOS）**；
+> **也没有在三星、vivo、OPPO、小米的实体安卓设备上测过**，小米的模拟器同样没测。实际跑过的只有
+> 安卓模拟器（AVD）和仓库里的自动化测试 —— 具体哪些验过、哪些没验，见
+> [docs/cross-device.md](docs/cross-device.md)。
+>
+> **测试只证明它测的那部分。** `npm test` 证明网关能启动、能鉴权、能代理、三处注入都在；
+> 它**不**证明你的手机、你的浏览器、你的网络能跑通。
+
 ```
 手机/平板浏览器  ──https://<局域网IP>:8443──▶  网关（Node，零依赖）  ──http://127.0.0.1:5140──▶  DSH Web
 ```
@@ -35,7 +48,7 @@ DSH 的 Web 服务只监听 `127.0.0.1:5140`。这是对的默认值：它不对
     "settings are unavailable in this browser"。
   - `ui/responsive.css` + `ui/responsive.js` —— 竖屏布局层，把桌面三栏自动变成可用的单列手机
     UI，转回横屏自动还原。
-- **文档** —— 安全模型、实测记录、跨 OEM 兼容矩阵、局域网之外的接入方案。
+- **文档** —— 安全模型、实测记录、移动端覆盖范围的诚实交代、局域网之外的接入方案。
 
 ## 快速开始
 
@@ -118,13 +131,24 @@ $env:DSH_GATE_TOKEN_LOG = "C:\path\to\dsh-launch-stdout.log"
 - 明确不做：多账号、按用户权限、权威 CA 证书（需要域名时的取舍见
   [docs/tunnel.md](docs/tunnel.md)）。
 
-## 兼容性
+## 兼容性 —— 验过什么、没验什么
 
-覆盖手机上真实存在的浏览器内核，从 Chromium 97 到 146 —— 矩阵与"通过"的口径见
-[docs/cross-device.md](docs/cross-device.md)。桌面浏览器同样可用，响应布局层会自动让路。
+这份清单刻意很短。
 
-Windows 的两个启动器（`run-gateway.vbs`、`start-gateway.ps1`）只是便利封装；网关本体是纯 Node，
-在 Linux/macOS 上原样可跑。
+| | 状态 |
+| --- | --- |
+| 网络工况 | **只有一种**：北邮 BUPT-mobile 校园网。客户端隔离、认证门户、802.1X/EAP、仅 IPv6、强制代理，均未处理、未测试。 |
+| 安卓设备 | **只有模拟器**（AVD `android-34`，AOSP x86_64，无 GMS），浏览器为 Firefox 136 与一个 Chromium 系内核。**没有用过任何实体手机或平板。** |
+| iOS / iPadOS | **完全没测。** Safari 对自签证书的提示、Cookie 策略、视口单位都与 Chromium 不同；布局层正是为此避开 `dvh` 与 `:has()`，但"避开风险"不等于"验证过"。 |
+| 鸿蒙 HarmonyOS | **完全没测。** |
+| 三星 / vivo / OPPO / 小米实体机 | **没测过。** 厂商浏器的证书例外入口位置、后台省电杀进程的激进程度、UA 怪癖都不一样。 |
+| 小米模拟器 | **没测过**；只用了 AOSP 镜像。 |
+| 宿主系统 | 在 Windows 上开发；`.vbs` / `.ps1` 是 Windows 专用便利封装。网关本体是纯 Node，CI 在 Linux 与 Windows 上都跑过，但**没有人在 Linux / macOS 上把它当日常工具用过**。 |
+
+真正被验证过的部分是下面那组自动化测试：`npm run test:unit` 与 `npm run test:smoke` 不需要
+设备、也不需要装 DSH。所有与设备相关的结论都来自
+[docs/evidence.md](docs/evidence.md) 记录的模拟器实测；完整口径见
+[docs/cross-device.md](docs/cross-device.md)。
 
 ## 测试
 
