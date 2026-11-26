@@ -1,0 +1,39 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # No committed secrets, no private addresses in the docs, no authoring-machine
+      # paths, every JavaScript file parses, and the runtime files the gateway reads
+      # are present where it looks for them.
+      - name: Repository checks
+        run: node scripts/check.mjs --strict
+
+      # Simulates an old tablet kernel, deletes the modern APIs, loads the injected
+      # polyfill and asserts they come back functional.
+      - name: Browser polyfill unit tests
+        run: npm run test:unit
+
+      # Boots the real gateway (self-signed cert via openssl) against a stub upstream
+      # and walks the phone flow: login page → password → authenticated index, then
+      # asserts the polyfill, ownsHost shim and responsive layer are all injected.
+      - name: Gateway smoke test
+        run: npm run test:smoke

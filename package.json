@@ -1,0 +1,35 @@
+{
+  "name": "dsh-remote",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Reach the DSH web UI from a phone or tablet browser on the same network: a zero-dependency Node TLS gateway with a password gate, plus browser polyfills and a responsive layout layer injected into DSH's own page.",
+  "type": "module",
+  "license": "MIT",
+  "main": "gateway/gateway.mjs",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node gateway/gateway.mjs",
+    "check": "node scripts/check.mjs && node tests/test-polyfill.mjs && node tests/test-tosorted.mjs",
+    "test:unit": "node tests/test-polyfill.mjs && node tests/test-tosorted.mjs",
+    "test:smoke": "node tests/smoke.mjs",
+    "test": "npm run check && npm run test:smoke"
+  },
+  "keywords": [
+    "dsh",
+    "remote-access",
+    "reverse-proxy",
+    "tls",
+    "mobile",
+    "zero-dependency"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/01float01/dsh-remote.git"
+  },
+  "bugs": {
+    "url": "https://github.com/01float01/dsh-remote/issues"
+  },
+  "homepage": "https://github.com/01float01/dsh-remote#readme"
+}

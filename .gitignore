@@ -1,0 +1,32 @@
+# Runtime state: self-signed cert, password hash, session secret, QR, logs.
+# Never commit any of it.
+gateway/state/
+
+# Secrets by extension
+*.pem
+*.key
+password.txt
+auth.json
+t_cookies.txt
+
+# Logs
+*.log
+gateway/gw.pid
+
+# Debug dumps produced while probing a live DSH
+gateway/t_*
+tests/t_*
+
+# Dependencies and virtualenvs
+node_modules/
+.venv/
+venv/
+__pycache__/
+
+# Editor / OS noise
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.bak
+*.bak-*

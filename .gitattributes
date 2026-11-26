@@ -1,0 +1,15 @@
+# Normalize line endings; keep the evidence screenshots binary.
+* text=auto eol=lf
+
+# The Windows launchers should keep CRLF so Explorer / cscript are happy.
+*.vbs text eol=crlf
+*.ps1 text eol=crlf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.zip binary
+
+*.md linguist-documentation

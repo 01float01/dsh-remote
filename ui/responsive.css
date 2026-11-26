@@ -1,0 +1,51 @@
+/* DSH Remote Block1 — macro responsive layer (portrait/landscape). Injected by gateway, does NOT touch DSH source. */
+:root{--dshb1-topbar:48px;--dshb1-drawer:300px;}
+/* ===== PORTRAIT / compact macro mode ===== */
+html.dshb1-portrait [data-dshb1-frame]{grid-template-columns:0 1fr 0 !important;grid-template-rows:100% !important;}
+html.dshb1-portrait [data-dshb1-center]{grid-column:2 !important;grid-row:1 !important;}
+html.dshb1-portrait [data-dshb1-sidebar]{grid-column:1 !important;grid-row:1 !important;}
+html.dshb1-portrait [data-dshb1-sidebar]{position:fixed !important;left:0;top:0;bottom:0;width:var(--dshb1-drawer) !important;max-width:85vw;z-index:1000;transform:translateX(-105%);transition:transform .25s ease;box-shadow:2px 0 16px rgba(0,0,0,.25);border-right:none !important;pointer-events:none;}
+html.dshb1-portrait.dshb1-drawer-open [data-dshb1-sidebar]{pointer-events:auto;}
+html.dshb1-portrait.dshb1-drawer-open [data-dshb1-sidebar]{transform:translateX(0);}
+html.dshb1-portrait [data-dshb1-center]{width:100% !important;min-width:0 !important;}
+/* rightbar: leave to upstream (autoFullscreen at narrow viewport); do NOT force overlay (blanked home) */
+html.dshb1-portrait [data-dshb1-handle]{display:none !important;}
+/* mobile top bar */
+#dshb1-topbar{display:none;}
+html.dshb1-portrait #dshb1-topbar{display:flex;align-items:center;gap:8px;position:fixed;top:0;left:0;right:0;height:var(--dshb1-topbar);z-index:2000;padding:0 8px;background:var(--dsw-alias-bg-base,#fff);border-bottom:1px solid var(--dsw-alias-border-l3,#e5e5e5);}
+html.dshb1-portrait [data-dshb1-frame]{padding-top:var(--dshb1-topbar);}
+#dshb1-burger{width:40px;height:40px;border:none;background:transparent;font-size:22px;line-height:1;cursor:pointer;border-radius:8px;color:inherit;}
+#dshb1-burger:active{background:rgba(128,128,128,.2);}
+#dshb1-title{font-size:15px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#dshb1-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:999;}
+html.dshb1-portrait.dshb1-drawer-open #dshb1-backdrop{display:block;}
+/* touch-friendly */
+html.dshb1-portrait button,html.dshb1-portrait [role="button"]{min-height:36px;}
+
+/* ===== Settings dialog (VOzbGW_*): fullscreen + stacked nav/content in portrait ===== */
+html.dshb1-portrait [class*="_overlay"] [class*="_panel"]{width:100% !important;max-width:100% !important;height:100% !important;border-radius:0 !important;flex-direction:column !important;}
+html.dshb1-portrait [class*="_panel"] > [class*="_nav"]{width:100% !important;height:auto !important;min-height:48px !important;flex-direction:row !important;flex-wrap:wrap !important;align-items:center !important;overflow:visible !important;padding:8px 12px !important;gap:6px !important;flex:none !important;border-bottom:1px solid var(--dsw-alias-border-l3,#e5e5e5);}
+html.dshb1-portrait [class*="_panel"] > [class*="_nav"] [class*="_navList"]{flex-direction:row !important;align-items:center !important;gap:6px !important;height:100% !important;}
+html.dshb1-portrait [class*="_panel"] > [class*="_nav"] [class*="_navCell"]{white-space:nowrap !important;flex:none !important;}
+html.dshb1-portrait [class*="_panel"] > [class*="_content"]{flex:1 1 auto !important;min-width:0 !important;min-height:0 !important;width:100% !important;overflow-y:auto !important;}
+
+/* ===== Archive/search result cards: wrap meta actions so buttons don't overlap in portrait ===== */
+html.dshb1-portrait [class*="_searchResultMeta"]{flex-wrap:wrap !important;margin-left:0 !important;gap:6px !important;}
+html.dshb1-portrait [class*="_searchResultRow"]{height:auto !important;min-height:48px !important;}
+html.dshb1-portrait [class*="_searchResultWorkspace"]{max-width:100% !important;}
+
+
+/* ===== Archive manager cards (dsh-arm-*): date row, retention badge below, buttons own row ===== */
+html.dshb1-portrait .dsh-arm-row{flex-wrap:wrap !important;align-items:flex-start !important;}
+html.dshb1-portrait .dsh-arm-info{flex:1 1 100% !important;}
+html.dshb1-portrait .dsh-arm-row-meta{flex-wrap:wrap !important;align-items:center !important;}
+html.dshb1-portrait .dsh-arm-meta-project{max-width:100% !important;}
+html.dshb1-portrait .dsh-arm-btn{flex:0 0 auto !important;}
+
+
+/* ===== Composer stats pills (turns/steps/tok-s | cache hit | %): wrap to 2 rows in portrait ===== */
+html.dshb1-portrait [data-composer-stats]{flex-wrap:wrap !important;justify-content:flex-start !important;row-gap:4px !important;}
+html.dshb1-portrait [data-composer-stats] > *:first-child{flex-basis:100% !important;}
+
+/* ===== LANDSCAPE / wide macro mode: keep official DSH layout, hide mobile chrome ===== */
+html.dshb1-landscape #dshb1-topbar,html.dshb1-landscape #dshb1-backdrop{display:none !important;}

@@ -1,0 +1,8 @@
+# cpolar 配置模板（authtoken 由用户提供后填入）
+# 用法：cpolar authtoken <你的token>  然后  cpolar tcp 8443
+# 或写入本文件后 cpolar start dshgate
+authtoken: REPLACE_WITH_USER_TOKEN
+tunnels:
+  dshgate:
+    proto: tcp
+    addr: 8443
