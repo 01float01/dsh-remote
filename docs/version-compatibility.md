@@ -2,7 +2,7 @@
 
 ## 背景
 独立对话把项目推到 GitHub（01float01/dsh-remote@c6605a7），并在 WSL2 隔离 VM 全新安装 DSH 0.2.2-rc.5 从头测试，
-报告 D:\NEXT_V3K1\Pre\Test_DeepAway\REPORT.md。核心提醒：此前未考虑 DSH 版本兼容。
+另附一份独立测试报告（隔离 VM 中的 `REPORT.md`）。核心提醒：此前未考虑 DSH 版本兼容。
 
 ## 一、报告核实（F1–F5 全部对照源码证实）
 | 编号 | 问题 | 根因（源码核实） | 修复 |

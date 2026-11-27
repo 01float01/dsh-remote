@@ -55,7 +55,7 @@ for (const file of files) {
   if (/\.bak($|-)/u.test(base)) fail('artifact', `backup file would be committed: ${file}`)
 }
 if (existsSync(join(ROOT, 'gateway', 'state'))) {
-  warn('state', 'gateway/state exists locally — it is git-ignored, keep it that way')
+  process.stdout.write('note  gateway/state exists locally (git-ignored); no action needed\n')
 }
 
 // 2. Text scans. Docs must be free of real addresses; code may legitimately mention
@@ -63,6 +63,8 @@ if (existsSync(join(ROOT, 'gateway', 'state'))) {
 const PEM = /-----BEGIN [A-Z ]*PRIVATE KEY-----/u
 const PRIVATE_IP = /\b(?:10|127)\.\d{1,3}\.\d{1,3}\.\d{1,3}\b|\b192\.168\.\d{1,3}\.\d{1,3}\b|\b172\.(?:1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}\b/u
 const AUTHOR_PATH = /[A-Za-z]:[\\/](?:Deepseek[_-][Hh]arness|Dev[\\/]node)/iu
+/** Any drive-rooted path is machine-specific once it lands in prose. */
+const DRIVE_PATH = /[A-Za-z]:[\\/][A-Za-z0-9_.-]/gu
 const TOKEN_LEAK = /\btoken=[A-Za-z0-9_-]{20,}/u
 
 for (const file of files) {
@@ -80,10 +82,21 @@ for (const file of files) {
   const ip = text.match(PRIVATE_IP)
   if (ip !== null) {
     const isDoc = /\.(md|txt)$/iu.test(file) || file === 'README.md'
-    const allowed = ip[0] === '127.0.0.1' || ip[0] === '10.0.2.2'
+    // Loopback, the Android emulator alias, and mock addresses inside tests/ are fine:
+    // a fixture that proves the virtual-NIC filter has to contain a virtual NIC address.
+    const allowed = ip[0] === '127.0.0.1' || ip[0] === '10.0.2.2' || file.startsWith('tests/')
     if (!allowed) {
       if (isDoc) fail('evidence', `real private address "${ip[0]}" in ${file} — redact it`)
       else warn('code', `private address "${ip[0]}" in ${file}`)
+    }
+  }
+  // Prose is public: a drive-rooted path from the authoring machine does not belong in it.
+  // Documented placeholders such as `C:\path\to\...` are allowed on purpose.
+  if (/\.(md|txt)$/iu.test(file)) {
+    for (const match of text.matchAll(DRIVE_PATH)) {
+      const around = text.slice(match.index, match.index + 24)
+      if (/^[A-Za-z]:[\\/](?:path|to|<)/iu.test(around)) continue
+      fail('path', `machine path "${around.split(/\s/u)[0]}" in ${file}`)
     }
   }
 }

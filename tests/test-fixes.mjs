@@ -18,11 +18,11 @@ assert.equal(last, 'NEWNEWNEWNEWNEWNEWNEWNEW02', 'F3 last token wins');
 console.log('F3 PASS: last token =', last);
 // F2: virtual NIC skip (replicate detectIp filter)
 const virtualName = /vethernet|vmnet|virtualbox|vbox|docker|tailscale|loopback|hyper-v|wsl|tap|tun/i;
-const ifs = { 'vEthernet (WSL)':[{family:'IPv4',internal:false,address:'172.18.0.1'}], 'VMware VMnet1':[{family:'IPv4',internal:false,address:'192.168.64.1'}], 'WLAN':[{family:'IPv4',internal:false,address:'10.21.241.249'}], 'Tailscale':[{family:'IPv4',internal:false,address:'169.254.83.107'}] };
+const ifs = { 'vEthernet (WSL)':[{family:'IPv4',internal:false,address:'172.18.0.1'}], 'VMware VMnet1':[{family:'IPv4',internal:false,address:'192.168.64.1'}], 'WLAN':[{family:'IPv4',internal:false,address:'192.168.1.50'}], 'Tailscale':[{family:'IPv4',internal:false,address:'169.254.83.107'}] };
 const cands=[]; for (const name of Object.keys(ifs)){ if(virtualName.test(name))continue; for(const a of ifs[name]) if(a.family==='IPv4'&&!a.internal&&!/^169\.254\./u.test(a.address))cands.push(a.address); }
 const isPrivate=a=>/^10\./u.test(a)||/^192\.168\./u.test(a)||/^172\.(1[6-9]|2\d|3[01])\./u.test(a);
 const picked=cands.find(isPrivate)||cands[0]||'127.0.0.1';
-assert.equal(picked,'10.21.241.249','F2 picks WLAN not virtual');
+assert.equal(picked,'192.168.1.50','F2 picks WLAN not virtual');
 console.log('F2 PASS: picked', picked);
 // F5: EADDRINUSE -> exit 1, no info.json
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(),'dshfix-'));
