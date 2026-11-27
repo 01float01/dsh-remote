@@ -15,7 +15,8 @@
 > (QR pairing, peer access control, TLS / reverse-proxy support). This project overlaps on
 > auth/TLS but still adds what the official build does not: **old-browser polyfills, a mobile
 > portrait layout, and zero-dependency one-click setup**. On stable DSH (≤0.2.2) the native
-> service is not yet present.
+> service is not yet present. Background and overlap analysis: section 7 of
+> [docs/version-compatibility.md](docs/version-compatibility.md).
 >
 > 中文说明见 [README.zh.md](README.zh.md)。
 
