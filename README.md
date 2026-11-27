@@ -1,5 +1,17 @@
 # dsh-remote
 
+> ## ⚠️ Temporary hold on downloads
+>
+> <!-- TEMP-NOTICE: remove this block once the DSH-compatibility re-test concludes -->
+>
+> A new round of testing found that the **development-phase tests did not account for DSH
+> version compatibility**. Emergency re-testing and fixes are in progress.
+>
+> **Please do not download or deploy this project for now.** This notice is temporary and will
+> be removed once the re-testing is finished.
+>
+> 中文说明见 [README.zh.md](README.zh.md)。
+
 Use your **DSH** web UI from a phone or tablet browser on the same Wi-Fi.
 No app, no VPN, no Termux, no tunnel — just a URL, a one-off certificate exception and a
 password.

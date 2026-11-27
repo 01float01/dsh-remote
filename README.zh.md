@@ -1,5 +1,13 @@
 # dsh-remote
 
+> ## ⚠️ 暂停下载（临时说明）
+>
+> <!-- TEMP-NOTICE: remove this block once the DSH-compatibility re-test concludes -->
+>
+> 该项目在最新一轮测试中发现：**开发阶段的测试未考虑 DSH 版本兼容问题**。目前正在**紧急复测并修复**。
+>
+> **在复测结论出来之前，请暂时不要下载或部署本项目**，谢谢。本条说明为临时内容，复测完成后即移除。
+
 用手机或平板的浏览器，通过同一 Wi-Fi 访问电脑上的 **DSH** Web 界面。
 不需要装 App、不需要 VPN、不需要 Termux、不需要内网穿透 —— 一个网址、一次证书例外、一个口令。
 
