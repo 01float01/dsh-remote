@@ -39,8 +39,8 @@
 
 ## 四、未尽
 - 浏览器层用 Edge/Chromium 设备仿真，非真机 OEM/ArkWeb/Safari（那些在 Block2/Block3 已真机/云真机/WebKit 验证）。
-- GitHub 仓库 responsive.js 为较早快照，Block1 后续微调（设置退出/归档/统计两排/语法地板探针）尚未合入，建议同步。
-- 网络受限无法 git push，修复在本地仓库 dsh-remote-vcompat/repo，待推送 GitHub。
+- 已核对：仓库内 `ui/responsive.js` 与 `ui/responsive.css` 与 Block1 源文件逐字节一致（sha256 相同），无需再同步。
+- 修复已推送：本提交（含 F1–F5）已在 `main` 上，此前那条「待推送 GitHub」的说法过期。
 
 ## 五、真机复测（荣耀手机/平板，第三方浏览器）
 - 平板横屏 + 小窗任意比例：百度/QQ 第三方浏览器（现代内核）全部 AC。
