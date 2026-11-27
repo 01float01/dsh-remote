@@ -1,12 +1,14 @@
 /* DSH Remote Block1 — macro responsive layer (portrait/landscape). Injected by gateway, does NOT touch DSH source. */
 :root{--dshb1-topbar:48px;--dshb1-drawer:300px;}
 /* ===== PORTRAIT / compact macro mode ===== */
-html.dshb1-portrait [data-dshb1-frame]{grid-template-columns:0 1fr 0 !important;grid-template-rows:100% !important;}
+html.dshb1-portrait [data-dshb1-frame]{grid-template-columns:0 1fr 0 !important;}
 html.dshb1-portrait [data-dshb1-center]{grid-column:2 !important;grid-row:1 !important;}
 html.dshb1-portrait [data-dshb1-sidebar]{grid-column:1 !important;grid-row:1 !important;}
-html.dshb1-portrait [data-dshb1-sidebar]{position:fixed !important;left:0;top:0;bottom:0;width:var(--dshb1-drawer) !important;max-width:85vw;z-index:1000;transform:translateX(-105%);transition:transform .25s ease;box-shadow:2px 0 16px rgba(0,0,0,.25);border-right:none !important;pointer-events:none;}
-html.dshb1-portrait.dshb1-drawer-open [data-dshb1-sidebar]{pointer-events:auto;}
-html.dshb1-portrait.dshb1-drawer-open [data-dshb1-sidebar]{transform:translateX(0);}
+html.dshb1-portrait [data-dshb1-sidebar]{position:fixed !important;left:0;top:0;bottom:0;width:var(--dshb1-drawer) !important;max-width:85vw;z-index:1000 !important;transform:translateX(-105%) !important;visibility:visible !important;transition:transform .25s ease;box-shadow:2px 0 16px rgba(0,0,0,.25);border-right:none !important;pointer-events:none;}
+html.dshb1-portrait.dshb1-drawer-open [data-dshb1-center]{pointer-events:none !important;}
+html.dshb1-portrait.dshb1-drawer-open [data-dshb1-sidebar]{pointer-events:auto !important;}
+html.dshb1-portrait.dshb1-drawer-open [data-dshb1-sidebar] *{pointer-events:auto !important;}
+html.dshb1-portrait.dshb1-drawer-open [data-dshb1-sidebar]{transform:translateX(0) !important;visibility:visible !important;}
 html.dshb1-portrait [data-dshb1-center]{width:100% !important;min-width:0 !important;}
 /* rightbar: leave to upstream (autoFullscreen at narrow viewport); do NOT force overlay (blanked home) */
 html.dshb1-portrait [data-dshb1-handle]{display:none !important;}
@@ -18,7 +20,7 @@ html.dshb1-portrait [data-dshb1-frame]{padding-top:var(--dshb1-topbar);}
 #dshb1-burger:active{background:rgba(128,128,128,.2);}
 #dshb1-title{font-size:15px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 #dshb1-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:999;}
-html.dshb1-portrait.dshb1-drawer-open #dshb1-backdrop{display:block;}
+html.dshb1-portrait.dshb1-drawer-open #dshb1-backdrop{display:block;left:var(--dshb1-drawer);}
 /* touch-friendly */
 html.dshb1-portrait button,html.dshb1-portrait [role="button"]{min-height:36px;}
 

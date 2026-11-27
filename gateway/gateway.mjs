@@ -165,8 +165,12 @@ function readToken(force) {
     const st = fs.statSync(cfg.tokenLog);
     if (!force && st.mtimeMs === tokenCache.mtime && tokenCache.value) return tokenCache.value;
     const txt = fs.readFileSync(cfg.tokenLog, "utf8");
-    const m = txt.match(/token=([A-Za-z0-9_-]{20,})/);
-    tokenCache = { value: m ? m[1] : "", mtime: st.mtimeMs };
+    // F3: take the LAST token in the log. Append-style logs accumulate rotated
+    // tokens; the first match would pin a stale token forever. Newest wins.
+    let last = "";
+    for (const m of txt.matchAll(/token=([A-Za-z0-9_-]{20,})/g)) last = m[1];
+    if (last && last !== tokenCache.value) log("token updated from log (last match)");
+    tokenCache = { value: last, mtime: st.mtimeMs };
     return tokenCache.value;
   } catch (e) { return tokenCache.value; }
 }
@@ -202,9 +206,15 @@ function ensureCert(ip) {
 
 function detectIp() {
   if (cfg.bindIp) return cfg.bindIp;
+  // F2: skip virtual/host-only adapters (WSL vEthernet, VMware VMnet, VirtualBox,
+  // Docker, Tailscale) and link-local — a phone on the Wi-Fi cannot reach those.
+  const virtualName = /vethernet|vmnet|virtualbox|vbox|docker|tailscale|loopback|hyper-v|wsl|tap|tun/i;
   const cands = [];
   const ifs = os.networkInterfaces();
-  for (const name of Object.keys(ifs)) for (const a of (ifs[name] || [])) if (a.family === "IPv4" && !a.internal) cands.push(a.address);
+  for (const name of Object.keys(ifs)) {
+    if (virtualName.test(name)) continue;
+    for (const a of (ifs[name] || [])) if (a.family === "IPv4" && !a.internal && !/^169\.254\./u.test(a.address)) cands.push(a.address);
+  }
   // Prefer an address a phone on the same Wi-Fi can actually reach: private
   // ranges first (RFC 1918), then anything else, then loopback. Override with
   // DSH_GATE_IP when the machine has several candidate interfaces.
@@ -483,6 +493,7 @@ function upgradeHandler(req, socket, head) {
 
 let currentIp = detectIp();
 let servers = [];
+let announced = false;
 function startServers(ip) {
   ensureCert(ip);
   const tls = { key: fs.readFileSync(path.join(STATE, "key.pem")), cert: fs.readFileSync(path.join(STATE, "cert.pem")) };
@@ -498,8 +509,20 @@ function startServers(ip) {
     s.keepAliveTimeout = 65000;
     s.on("upgrade", upgradeHandler);
     s.on("clientError", function (e, sock) { try { sock.destroy(); } catch (e2) {} });
-    s.listen(cfg.listenPort, addr, function () { log("listening https://" + addr + ":" + cfg.listenPort); });
-    s.on("error", function (e) { log("server error on " + addr, e.code || e.message); });
+    s.listen(cfg.listenPort, addr, function () {
+      log("listening https://" + addr + ":" + cfg.listenPort);
+      // F5: announce only after a real bind succeeds (not before the async listen).
+      if (!announced) { announced = true; printBanner(); log("gateway started", { ip: currentIp, port: cfg.listenPort, dsh: DSH_AUTHORITY }); }
+    });
+    s.on("error", function (e) {
+      log("server error on " + addr, e.code || e.message);
+      // F5: port occupied => exit non-zero, never print a ready banner / QR / info.json
+      // that would point scanners at whoever actually owns the port.
+      if (e.code === "EADDRINUSE") {
+        console.error("\n[FATAL] 端口 " + cfg.listenPort + " 已被占用（" + addr + "）。请停止占用该端口的进程，或用 DSH_GATE_PORT 换端口。网关未就绪，未生成二维码/info.json。\n");
+        process.exit(1);
+      }
+    });
     made.push(s);
   }
   return made;
@@ -555,8 +578,7 @@ function printBanner() {
 }
 
 servers = startServers(currentIp);
-printBanner();
-log("gateway started", { ip: currentIp, port: cfg.listenPort, dsh: DSH_AUTHORITY });
+// F5: banner/start log now emitted from the successful listen callback above.
 
 setInterval(function () {
   const ip = detectIp();

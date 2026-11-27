@@ -1,14 +1,21 @@
 # dsh-remote
 
-> ## ⚠️ Temporary hold on downloads
+> ## ✅ DSH version compatibility re-tested
 >
-> <!-- TEMP-NOTICE: remove this block once the DSH-compatibility re-test concludes -->
+> Re-tested across **DSH 0.1.7-rc.2 → 0.2.3-alpha.2** (isolated instances, curl + real-browser
+> layers, plus real Honor hardware): all pass. Five deployment bugs found by an independent
+> isolated audit (QR, NIC selection, token rotation, port-conflict, doc) are fixed.
+> See [docs/version-compatibility.md](docs/version-compatibility.md).
 >
-> A new round of testing found that the **development-phase tests did not account for DSH
-> version compatibility**. Emergency re-testing and fixes are in progress.
+> **Always prefer a current third-party browser** (Chrome / Edge / Firefox / Quark / Baidu / QQ)
+> over the OEM system browser — especially on older Android or HarmonyOS handsets. Modern
+> third-party engines sidestep the old-kernel CSS/JS gaps entirely.
 >
-> **Please do not download or deploy this project for now.** This notice is temporary and will
-> be removed once the re-testing is finished.
+> **Note:** the latest DSH (**0.2.3-alpha**) has begun shipping its own native remote service
+> (QR pairing, peer access control, TLS / reverse-proxy support). This project overlaps on
+> auth/TLS but still adds what the official build does not: **old-browser polyfills, a mobile
+> portrait layout, and zero-dependency one-click setup**. On stable DSH (≤0.2.2) the native
+> service is not yet present.
 >
 > 中文说明见 [README.zh.md](README.zh.md)。
 
